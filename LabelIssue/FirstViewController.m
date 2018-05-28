@@ -27,15 +27,28 @@
         NSMutableParagraphStyle *paragraph = [[NSMutableParagraphStyle alloc] init];
         paragraph.lineSpacing = 2.0f;
         
-        result = @{NSFontAttributeName: font, NSParagraphStyleAttributeName: paragraph};
+		result = @{NSFontAttributeName: font, NSParagraphStyleAttributeName: paragraph};
     }
-    __auto_type text = @"Новосибирская дорожная яма появилась на Google Maps в разделе «Достопримечательности».\n\nИ на неё уже есть\nпрекрасные  отзывы\n";
+	//Новосибирская дорожная яма появилась на Google Maps в разделе «Достопримечательности».
+	
+//	И на неё уже есть прекрасные отзывы
+	
+//http://news.lenta.ch/Ck4X
+    __auto_type text = @"Новосибирская дорожная яма появилась на Google Maps в разделе «Достопримечательности».\n\nИ на неё уже есть прекрасные отзывы\n";
     __auto_type attributedString = [[NSAttributedString alloc] initWithString:text attributes:result];
+	
+	CGSize fittingSize = CGSizeMake(250, CGFLOAT_MAX);
+	NSStringDrawingOptions options = NSStringDrawingUsesFontLeading | NSStringDrawingUsesLineFragmentOrigin;
+	CGSize textSize = [attributedString boundingRectWithSize:fittingSize options:options context:NULL].size;
+	textSize.width = ceilf(textSize.width);
+	textSize.height = MAX(ceilf(textSize.height), 22.0f);
     
-    __auto_type label = [[UILabel alloc] initWithFrame:CGRectMake(30, 100, 250, 177)];
+    __auto_type label = [[UILabel alloc] initWithFrame:CGRectMake(30, 100, textSize.width, textSize.height)];
     label.numberOfLines = 0;
     label.attributedText = attributedString;
     label.backgroundColor = [UIColor redColor];
+	label.adjustsFontSizeToFitWidth = true;
+	label.minimumScaleFactor = 0.3;
     [self.view addSubview:label];
     
     
@@ -58,15 +71,16 @@
                                    previosRange = result.range;
                                    [highlightedRanges addObject:[NSValue valueWithRange:result.range]];
                                }
-                           }];
-     CGRect rect;
-    for (NSValue *rangeValue in highlightedRanges)
-    {
+						   }];
+	CGRect rect;
+	for (NSValue *rangeValue in highlightedRanges)
+	{
         __auto_type range = [rangeValue rangeValue];
-        __auto_type textStorage = [[NSTextStorage alloc] initWithAttributedString:textH];
-        __auto_type textContainer = [[NSTextContainer alloc] initWithSize:label.bounds.size];
+		__auto_type textStorage = [[NSTextStorage alloc] initWithString:text attributes:result];
+		textSize = label.bounds.size;
+        __auto_type textContainer = [[NSTextContainer alloc] initWithSize:textSize];
         textContainer.lineFragmentPadding = 0.f;
-        
+		
         __auto_type layoutManager = [[NSLayoutManager alloc] init];
         [textStorage addLayoutManager:layoutManager];
         [layoutManager addTextContainer:textContainer];
@@ -93,12 +107,5 @@
     highlightedLayer.shadowOpacity = 0.2;
     [self.view.layer addSublayer:highlightedLayer];
 }
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 
 @end
